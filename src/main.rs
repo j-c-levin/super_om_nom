@@ -228,6 +228,9 @@ fn apply_force_to_attached(
         let pos = Vec3::new(cursor_world_pos.x, cursor_world_pos.y, 0.0);
 
         if transform.translation.distance(pos) < 20.0 {
+    // TODO: this stops objects too rapidly - objects should gradually ease towards the cursor,
+            // TODO: lerp the reduction?
+
             linear_velocity.x *= 0.1;
             linear_velocity.y *= 0.1;
         }
