@@ -2,15 +2,32 @@ use bevy::prelude::*;
 use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::sprite::MaterialMesh2dBundle;
+use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::{math::*, prelude::*};
+
+#[derive(Component)]
+pub struct Attached;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, PhysicsPlugins::default()))
-        .add_systems(Update, bevy::window::close_on_esc)
+        .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
+            primary_window: Some(Window {
+                title: "Super om nom".into(),
+                resolution: (500., 600.).into(),
+                enabled_buttons: bevy::window::EnabledButtons {
+                    maximize: false,
+                    ..Default::default()
+                },
+                ..default()
+            }),
+            ..default()
+        }))
+        .add_plugins(PhysicsPlugins::default())
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
         .insert_resource(Gravity(Vector::NEG_Y * 1000.0))
         .add_systems(Startup, setup)
+        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Update, apply_force_to_attached)
         .run();
 }
 
@@ -49,6 +66,7 @@ fn setup(
         },
         RigidBody::Dynamic,
         Collider::rectangle(30.0, 30.0),
+        Attached
     ));
 
     // Platforms
@@ -176,4 +194,42 @@ fn setup(
 
     // Camera
     commands.spawn(Camera2dBundle::default());
+}
+
+fn apply_force_to_attached(
+    time: Res<Time>,
+    mut attached: Query<(&mut LinearVelocity, &Transform), With<Attached>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    camera: Query<(&Camera, &GlobalTransform)>,
+) {
+    let Ok((mut linear_velocity, transform)) = attached.get_single_mut() else {
+        println!("no attached found");
+        return;
+    };
+
+    // mouse position
+    let window = windows.single();
+    let (camera, camera_transform) = camera.single();
+    if let Some(cursor_world_pos) = window
+        .cursor_position()
+        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
+    {
+        let x_strength = 200.0;
+        let y_strength = 1300.0;
+        let delta_time = time.delta_seconds();
+
+        let flipped_x = if cursor_world_pos.x > transform.translation.x { 1.0 } else { -1.0 };
+        let flipped_y = if cursor_world_pos.y > transform.translation.y { 1.0 } else { -1.0 };
+
+        linear_velocity.x += x_strength * delta_time * flipped_x;
+        linear_velocity.y += y_strength * delta_time * flipped_y;
+
+        // if object is close to mouse, set forces to 0
+        let pos = Vec3::new(cursor_world_pos.x, cursor_world_pos.y, 0.0);
+
+        if transform.translation.distance(pos) < 20.0 {
+            linear_velocity.x *= 0.1;
+            linear_velocity.y *= 0.1;
+        }
+    }
 }
