@@ -216,3 +216,9 @@ so it's actually nothing to do with angle, it's to do with y elevation.  if you 
 yes!  that could be it.  same for x component - there is a band around the player where om nom experiences a force in the same direction as the object.  but outside of that band om nom experiences an opposite force
 
 or...it turns out you can just always have the force acting in the opposite direction and it'll always just work and is easier to grasp.  maybe just need to play and see.
+
+----
+
+so where do we go from here?
+
+* om nom can apply a force to an object as a factor of its mass, but the object also applies an opposite force to om nom equal to...well, its mass (capped at om-nom's mass).  It just so happens that om nom shouldn't go flying until it tries to lift something super heavy?  i dunno, we've gone in circles on this, let's just give it a go.
