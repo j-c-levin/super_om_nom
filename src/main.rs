@@ -214,25 +214,29 @@ fn apply_force_to_attached(
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
     {
-        let x_strength = 200.0;
-        let y_strength = 1300.0;
+        // F=-kx-cv
+        // k is spring constantly ('stiffness')
+        let kx = 20.0;
+        let ky = 100.0;
+
+        // x is distance from spring resting point
+        let dist_x = cursor_world_pos.x - transform.translation.x;
+        let dist_y = cursor_world_pos.y - transform.translation.y;
+
         let delta_time = time.delta_seconds();
 
-        let flipped_x = if cursor_world_pos.x > transform.translation.x { 1.0 } else { -1.0 };
-        let flipped_y = if cursor_world_pos.y > transform.translation.y { 1.0 } else { -1.0 };
+        // c is the damping amount
+        let c = 0.05;
 
-        linear_velocity.x += x_strength * delta_time * flipped_x;
-        linear_velocity.y += y_strength * delta_time * flipped_y;
+        // v is object velocity
+        let damp_x = linear_velocity.x;
+        let damp_y = linear_velocity.y;
 
-        // if object is close to mouse, set forces to 0
-        let pos = Vec3::new(cursor_world_pos.x, cursor_world_pos.y, 0.0);
+        let x_force = kx * dist_x;
+        let y_force = ky * dist_y;
 
-        if transform.translation.distance(pos) < 20.0 {
-    // TODO: this stops objects too rapidly - objects should gradually ease towards the cursor,
-            // TODO: lerp the reduction?
-
-            linear_velocity.x *= 0.1;
-            linear_velocity.y *= 0.1;
-        }
+        // F=-kx-cv (i just don't use the minus)
+        linear_velocity.x += (x_force * delta_time) - (c * damp_x);
+        linear_velocity.y += (y_force * delta_time) - (c * damp_y);
     }
 }
