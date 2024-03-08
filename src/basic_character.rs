@@ -15,11 +15,6 @@ use bevy_mod_picking::prelude::*;
 #[derive(Component)]
 pub struct Attached;
 
-#[derive(Resource)]
-pub struct PreviouslyAttached {
-    entity: Entity,
-}
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
@@ -55,20 +50,36 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>
 ) {
     // Player
     commands.spawn((
+        SpriteBundle {
+            sprite: Sprite{
+                custom_size: Some(Vec2::splat(30.0)),
+                ..default()
+            },
+            texture: asset_server.load("om_nom.png"),
+            ..default()
+        },
+        RigidBody::Dynamic,
+        Collider::rectangle(30.0, 30.0),
+        Name::new("player")
+    ));
+
+    // heavy capsule
+    commands.spawn((
         MaterialMesh2dBundle {
-            mesh: meshes.add(Capsule2d::new(12.5, 20.0)).into(),
+            mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
             material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
-            transform: Transform::from_xyz(0.0, -100.0, 0.0),
+            transform: Transform::from_xyz(80.0, 80.0, 0.0),
             ..default()
         },
         Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
         Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
-        ColliderDensity(2.0),
+        ColliderDensity(10.0),
         GravityScale(1.5),
-        Collider::capsule(20.0, 12.5),
+        Collider::capsule(40.0, 25.0),
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
         PickableBundle::default(),
@@ -78,12 +89,12 @@ fn setup(
         Name::new("capsule")
     ));
 
-    // A cube to move around
+    // light cube
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
             material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
-            transform: Transform::from_xyz(50.0, -100.0, 0.0),
+            transform: Transform::from_xyz(-50.0, 100.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
