@@ -3,6 +3,7 @@ use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
+#[allow(unused_imports)]
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::{math::*, prelude::*};
 use bevy_mod_picking::prelude::*;
@@ -10,12 +11,17 @@ use bevy_mod_picking::prelude::*;
 #[derive(Component)]
 pub struct Attached;
 
+#[derive(Resource)]
+pub struct PreviouslyAttached {
+    entity: Entity,
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
             primary_window: Some(Window {
                 title: "Super om nom".into(),
-                resolution: (500., 600.).into(),
+                // resolution: (500., 600.).into(),
                 enabled_buttons: bevy::window::EnabledButtons {
                     maximize: false,
                     ..Default::default()
@@ -30,10 +36,12 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(Update, (
             apply_force_to_attached,
-            update_selected,
-            bevy::window::close_on_esc
+            bevy::window::close_on_esc,
+            change_detection
         ))
         .add_plugins(DefaultPickingPlugins)
+
+        // debug systems
         // .add_plugins(WorldInspectorPlugin::new())
         // .insert_resource(DebugPickingMode::Normal)
         .run();
@@ -68,15 +76,6 @@ fn setup(
 
     // A cube to move around
     commands.spawn((
-        // SpriteBundle {
-        //     sprite: Sprite {
-        //         color: Color::rgb(0.0, 0.4, 0.7),
-        //         custom_size: Some(Vec2::new(30.0, 30.0)),
-        //         ..default()
-        //     },
-        //     transform: Transform::from_xyz(50.0, -100.0, 0.0),
-        //     ..default()
-        // },
         MaterialMesh2dBundle {
             mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
             material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
@@ -263,23 +262,15 @@ fn apply_force_to_attached(
     }
 }
 
-fn update_selected(
+fn change_detection(
     mut commands: Commands,
-    mut query: Query<(Entity, Option<&PickingInteraction>), Changed<PickingInteraction>>,
-    previous: Query<Entity, With<Attached>>
+    query: Query<(Entity, &PickSelection), Changed<PickSelection>>,
 ) {
-    for (entity, interaction) in &mut query {
-        match interaction {
-            Some(PickingInteraction::Pressed) => {
-                let Ok(prev) = previous.get_single() else {
-                    return;
-                };
-                commands.entity(prev).remove::<Attached>();
-                if prev != entity {
-                    commands.entity(entity).insert(Attached);
-                }
-            },
-            _ => { return }
-        };
+    for (entity, component) in &query {
+        if component.is_selected == false {
+            commands.entity(entity).remove::<Attached>();
+        } else {
+            commands.entity(entity).insert(Attached);
+        }
     }
 }
