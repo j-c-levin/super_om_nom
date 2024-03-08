@@ -269,8 +269,9 @@ fn change_detection(
     for (entity, component) in &query {
         if component.is_selected == false {
             commands.entity(entity).remove::<Attached>();
+            commands.entity(entity).remove::<Pickable>();
         } else {
-            commands.entity(entity).insert(Attached);
+            commands.entity(entity).insert((Attached, Pickable::IGNORE));
         }
     }
 }
