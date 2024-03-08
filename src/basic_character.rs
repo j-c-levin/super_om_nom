@@ -1,9 +1,5 @@
 /*!
-This example is about clicking on objects and that they
-behave like they are on a spring attached to your mouse.
-
-Click to select and object.
-Click again to deselect and let it go.
+This example is about a player character that either moves light objects or itself when grabbing something heavy or a static point.
  */
 
 use bevy::prelude::*;
@@ -26,7 +22,7 @@ pub struct PreviouslyAttached {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
+        .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
             primary_window: Some(Window {
                 title: "Super om nom".into(),
                 // resolution: (500., 600.).into(),
@@ -264,7 +260,7 @@ fn apply_force_to_attached(
         let x_force = kx * dist_x;
         let y_force = ky * dist_y;
 
-        // F=-kx-cv (I just don't use the minus)
+        // F=-kx-cv (i just don't use the minus)
         linear_velocity.x += (x_force * delta_time) - (c * damp_x);
         linear_velocity.y += (y_force * delta_time) - (c * damp_y);
     }
