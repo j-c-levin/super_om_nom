@@ -50,12 +50,12 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
 ) {
     // Player
     commands.spawn((
         SpriteBundle {
-            sprite: Sprite{
+            sprite: Sprite {
                 custom_size: Some(Vec2::splat(30.0)),
                 ..default()
             },
@@ -75,7 +75,7 @@ fn setup(
             transform: Transform::from_xyz(80.0, 80.0, 0.0),
             ..default()
         },
-        Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
+        Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
         Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
         ColliderDensity(10.0),
         GravityScale(1.5),
@@ -98,6 +98,7 @@ fn setup(
             ..default()
         },
         RigidBody::Dynamic,
+        Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
         Collider::rectangle(30.0, 30.0),
         PickableBundle::default(),
         On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
@@ -235,11 +236,14 @@ fn setup(
 
 fn apply_force_to_attached(
     time: Res<Time>,
-    mut attached: Query<(&mut LinearVelocity, &Transform), With<Attached>>,
+    mut attached: Query<(&mut LinearVelocity, &Transform, &ColliderDensity), With<Attached>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     camera: Query<(&Camera, &GlobalTransform)>,
 ) {
-    let Ok((mut linear_velocity, transform)) = attached.get_single_mut() else {
+    let Ok((mut linear_velocity,
+               transform,
+               collider_density
+           )) = attached.get_single_mut() else {
         return;
     };
 
@@ -268,12 +272,21 @@ fn apply_force_to_attached(
         let damp_x = linear_velocity.x;
         let damp_y = linear_velocity.y;
 
-        let x_force = kx * dist_x;
-        let y_force = ky * dist_y;
+        let hookes_x = kx * dist_x;
+        let hookes_y = ky * dist_y;
 
-        // F=-kx-cv (i just don't use the minus)
-        linear_velocity.x += (x_force * delta_time) - (c * damp_x);
-        linear_velocity.y += (y_force * delta_time) - (c * damp_y);
+        // F=-kx-cv (I just don't use the minus)
+        let force_x = (hookes_x * delta_time) - (c * damp_x);
+        let force_y = (hookes_y * delta_time) - (c * damp_y);
+
+        // F=ma, so object acceleration = F/m
+        linear_velocity.x += force_x / collider_density.0;
+        linear_velocity.y += force_y / collider_density.0;
+
+        //! todo:
+        //! 1. show a line between om nom and what it's attached to
+        //! 2. when om nom applies a force to the object, apply a mass-based force back on om-nom
+        //! such that light objects don't move om-nom but om-nom moves when attached to a heavy
     }
 }
 
