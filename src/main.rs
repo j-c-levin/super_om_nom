@@ -3,7 +3,9 @@ use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::{math::*, prelude::*};
+use bevy_mod_picking::prelude::*;
 
 #[derive(Component)]
 pub struct Attached;
@@ -26,8 +28,14 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
         .insert_resource(Gravity(Vector::NEG_Y * 1000.0))
         .add_systems(Startup, setup)
-        .add_systems(Update, bevy::window::close_on_esc)
-        .add_systems(Update, apply_force_to_attached)
+        .add_systems(Update, (
+            apply_force_to_attached,
+            update_selected,
+            bevy::window::close_on_esc
+        ))
+        .add_plugins(DefaultPickingPlugins)
+        // .add_plugins(WorldInspectorPlugin::new())
+        // .insert_resource(DebugPickingMode::Normal)
         .run();
 }
 
@@ -51,22 +59,37 @@ fn setup(
         Collider::capsule(20.0, 12.5),
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
+        PickableBundle::default(),
+        On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
+            target_commands.insert(Attached);
+        }),
+        Name::new("capsule")
     ));
 
     // A cube to move around
     commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color: Color::rgb(0.0, 0.4, 0.7),
-                custom_size: Some(Vec2::new(30.0, 30.0)),
-                ..default()
-            },
+        // SpriteBundle {
+        //     sprite: Sprite {
+        //         color: Color::rgb(0.0, 0.4, 0.7),
+        //         custom_size: Some(Vec2::new(30.0, 30.0)),
+        //         ..default()
+        //     },
+        //     transform: Transform::from_xyz(50.0, -100.0, 0.0),
+        //     ..default()
+        // },
+        MaterialMesh2dBundle {
+            mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
+            material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
             transform: Transform::from_xyz(50.0, -100.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
         Collider::rectangle(30.0, 30.0),
-        Attached
+        PickableBundle::default(),
+        On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
+            target_commands.insert(Attached);
+        }),
+        Name::new("square")
     ));
 
     // Platforms
@@ -203,7 +226,6 @@ fn apply_force_to_attached(
     camera: Query<(&Camera, &GlobalTransform)>,
 ) {
     let Ok((mut linear_velocity, transform)) = attached.get_single_mut() else {
-        println!("no attached found");
         return;
     };
 
@@ -238,5 +260,26 @@ fn apply_force_to_attached(
         // F=-kx-cv (i just don't use the minus)
         linear_velocity.x += (x_force * delta_time) - (c * damp_x);
         linear_velocity.y += (y_force * delta_time) - (c * damp_y);
+    }
+}
+
+fn update_selected(
+    mut commands: Commands,
+    mut query: Query<(Entity, Option<&PickingInteraction>), Changed<PickingInteraction>>,
+    previous: Query<Entity, With<Attached>>
+) {
+    for (entity, interaction) in &mut query {
+        match interaction {
+            Some(PickingInteraction::Pressed) => {
+                let Ok(prev) = previous.get_single() else {
+                    return;
+                };
+                commands.entity(prev).remove::<Attached>();
+                if prev != entity {
+                    commands.entity(entity).insert(Attached);
+                }
+            },
+            _ => { return }
+        };
     }
 }
