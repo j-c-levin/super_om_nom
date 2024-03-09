@@ -1,2 +1,3 @@
-when om nom applies a force to the object, apply a mass-based force back on om-nom
-such that light objects don't move om-nom but om-nom moves when attached to a heavy
+it's kind of working, but there's also some funny edge cases.  do i want to fix them or just move on?
+
+i feel like just move on - next ones will probably involve clamping distance etc.
