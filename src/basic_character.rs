@@ -15,6 +15,9 @@ use bevy_mod_picking::prelude::*;
 #[derive(Component)]
 pub struct Attached;
 
+#[derive(Component)]
+struct OmNom;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
@@ -36,7 +39,8 @@ fn main() {
         .add_systems(Update, (
             apply_force_to_attached,
             bevy::window::close_on_esc,
-            change_detection
+            change_detection,
+            draw_line_to_attached
         ))
         .add_plugins(DefaultPickingPlugins)
 
@@ -56,16 +60,18 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                custom_size: Some(Vec2::splat(30.0)),
+                custom_size: Some(Vec2::splat(60.0)),
                 ..default()
             },
             texture: asset_server.load("om_nom.png"),
+            transform: Transform::from_xyz(0.0, -50.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
-        Collider::rectangle(30.0, 30.0),
-        Name::new("player")
+        Collider::rectangle(60.0, 60.0),
+        Name::new("player"),
+        OmNom
     ));
 
     // heavy capsule
@@ -105,7 +111,8 @@ fn setup(
         On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
             target_commands.insert(Attached);
         }),
-        Name::new("square")
+        Name::new("square"),
+        LockedAxes::ROTATION_LOCKED,
     ));
 
     // Platforms
@@ -283,10 +290,6 @@ fn apply_force_to_attached(
         // F=ma, so object acceleration = F/m
         linear_velocity.x += force_x / collider_density.0;
         linear_velocity.y += force_y / collider_density.0;
-
-        // 1. show a line between om nom and what it's attached to
-        // 2. when om nom applies a force to the object, apply a mass-based force back on om-nom
-        // such that light objects don't move om-nom but om-nom moves when attached to a heavy
     }
 }
 
@@ -302,4 +305,22 @@ fn change_detection(
             commands.entity(entity).insert((Attached, Pickable::IGNORE));
         }
     }
+}
+
+fn draw_line_to_attached(
+    mut gizmos: Gizmos,
+    om_nom: Query<&Transform, With<OmNom>>,
+    attached: Query<&Transform, With<Attached>>
+) {
+    let Ok(attached) = attached.get_single() else {
+        return
+    };
+
+    let Ok(om_nom) = om_nom.get_single() else {
+        panic!("no om nom!")
+    };
+
+    let pos_om_nom = Vec2::new(om_nom.translation.x, om_nom.translation.y);
+    let pos_attached = Vec2::new(attached.translation.x, attached.translation.y);
+    gizmos.line_2d(pos_om_nom, pos_attached, Color::RED);
 }
