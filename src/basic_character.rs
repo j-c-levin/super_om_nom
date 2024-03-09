@@ -71,6 +71,7 @@ fn setup(
         },
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
+        Friction::new(0.1),
         Collider::rectangle(player_size, player_size),
         Name::new("player"),
         OmNom
@@ -262,43 +263,46 @@ fn apply_force_to_attached(
     // mouse position
     let window = windows.single();
     let (camera, camera_transform) = camera.single();
-    if let Some(cursor_world_pos) = window
+    let Some(cursor_world_pos) = window
         .cursor_position()
-        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
-    {
-        // F=-kx-cv
-        // k is spring constantly ('stiffness')
-        let kx = 20.0;
-        let ky = 100.0;
+        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor)) else {
+        return;
+    };
 
-        // x is distance from spring resting point
-        let dist_x = cursor_world_pos.x - transform.translation.x;
-        let dist_y = cursor_world_pos.y - transform.translation.y;
+    // F=-kx-cv
+    // k is spring constantly ('stiffness')
+    let kx = 20.0;
+    let ky = 100.0;
 
-        let delta_time = time.delta_seconds();
+    // x is distance from spring resting point
+    let dist_x = cursor_world_pos.x - transform.translation.x;
+    let dist_y = cursor_world_pos.y - transform.translation.y;
 
-        // c is the damping amount
-        let c = 0.05;
+    let delta_time = time.delta_seconds();
 
-        // v is object velocity
-        let damp_x = linear_velocity.x;
-        let damp_y = linear_velocity.y;
+    // c is the damping amount
+    let c = 0.05;
 
-        let hookes_x = kx * dist_x;
-        let hookes_y = ky * dist_y;
+    // v is object velocity
+    let damp_x = linear_velocity.x;
+    let damp_y = linear_velocity.y;
 
-        // F=-kx-cv (I just don't use the minus)
-        let force_x = (hookes_x * delta_time) - (c * damp_x);
-        let force_y = (hookes_y * delta_time) - (c * damp_y);
+    let hookes_x = kx * dist_x;
+    let hookes_y = ky * dist_y;
 
-        // F=ma, so object acceleration = F/m
-        linear_velocity.x += force_x / collider_density.0;
-        linear_velocity.y += force_y / collider_density.0;
+    // F=-kx-cv (I just don't use the minus)
+    let force_x = (hookes_x * delta_time) - (c * damp_x);
+    let force_y = (hookes_y * delta_time) - (c * damp_y);
 
-        // apply force to om nom
-        lv_om_nom.x += -force_x;
-        lv_om_nom.y += -force_y;
-    }
+    // F=ma, so object acceleration = F/m
+    linear_velocity.x += force_x / collider_density.0;
+    linear_velocity.y += force_y / collider_density.0;
+
+    // apply a fraction of the force back to om nom
+    let force_const = 0.1;
+
+    lv_om_nom.x += -force_const * force_x;
+    lv_om_nom.y += -force_const * force_y;
 }
 
 fn change_detection(
