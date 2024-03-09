@@ -37,8 +37,8 @@ fn main() {
         .insert_resource(Gravity(Vector::NEG_Y * 1000.0))
         .add_systems(Startup, setup)
         .add_systems(Update, (
-            apply_force_to_attached,
             bevy::window::close_on_esc,
+            apply_force_to_attached,
             change_detection,
             draw_line_to_attached
         ))
