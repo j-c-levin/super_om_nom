@@ -84,7 +84,7 @@ fn setup(
         },
         Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
         Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
-        ColliderDensity(10.0),
+        ColliderDensity(300.0),
         GravityScale(1.5),
         Collider::capsule(40.0, 25.0),
         RigidBody::Dynamic,
