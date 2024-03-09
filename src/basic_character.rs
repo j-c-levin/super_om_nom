@@ -46,6 +46,7 @@ fn main() {
 
         // debug systems
         // .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins(PhysicsDebugPlugin::default())
         // .insert_resource(DebugPickingMode::Normal)
         .run();
 }
@@ -57,10 +58,11 @@ fn setup(
     asset_server: Res<AssetServer>,
 ) {
     // Player
+    let player_size = 40.0;
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                custom_size: Some(Vec2::splat(60.0)),
+                custom_size: Some(Vec2::splat(player_size)),
                 ..default()
             },
             texture: asset_server.load("om_nom.png"),
@@ -69,7 +71,7 @@ fn setup(
         },
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
-        Collider::rectangle(60.0, 60.0),
+        Collider::rectangle(player_size, player_size),
         Name::new("player"),
         OmNom
     ));
@@ -247,12 +249,14 @@ fn apply_force_to_attached(
     mut attached: Query<(&mut LinearVelocity, &Transform, &ColliderDensity), With<Attached>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     camera: Query<(&Camera, &GlobalTransform)>,
+    mut om_nom: Query<&mut LinearVelocity, (With<OmNom>, Without<Attached>)>,
 ) {
-    let Ok((mut linear_velocity,
-               transform,
-               collider_density
-           )) = attached.get_single_mut() else {
+    let Ok((mut linear_velocity, transform, collider_density)) = attached.get_single_mut() else {
         return;
+    };
+
+    let Ok(mut lv_om_nom) = om_nom.get_single_mut() else {
+        panic!("no om nom")
     };
 
     // mouse position
@@ -290,6 +294,10 @@ fn apply_force_to_attached(
         // F=ma, so object acceleration = F/m
         linear_velocity.x += force_x / collider_density.0;
         linear_velocity.y += force_y / collider_density.0;
+
+        // apply force to om nom
+        lv_om_nom.x += -force_x;
+        lv_om_nom.y += -force_y;
     }
 }
 
@@ -310,10 +318,10 @@ fn change_detection(
 fn draw_line_to_attached(
     mut gizmos: Gizmos,
     om_nom: Query<&Transform, With<OmNom>>,
-    attached: Query<&Transform, With<Attached>>
+    attached: Query<&Transform, With<Attached>>,
 ) {
     let Ok(attached) = attached.get_single() else {
-        return
+        return;
     };
 
     let Ok(om_nom) = om_nom.get_single() else {
