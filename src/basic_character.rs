@@ -284,7 +284,6 @@ fn apply_force_to_attached(
         linear_velocity.x += force_x / collider_density.0;
         linear_velocity.y += force_y / collider_density.0;
 
-        // todo:
         // 1. show a line between om nom and what it's attached to
         // 2. when om nom applies a force to the object, apply a mass-based force back on om-nom
         // such that light objects don't move om-nom but om-nom moves when attached to a heavy
