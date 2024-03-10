@@ -92,22 +92,68 @@ fn setup(
     ));
 
     // Walls
-
-
-    // Platforms
+    let length_wall = 1400.0;
+    let width_wall = 50.0;
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::rgb(0.7, 0.7, 0.8),
-                custom_size: Some(Vec2::new(1100.0, 50.0)),
+                custom_size: Some(Vec2::new(length_wall, width_wall)),
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, -175.0, 0.0),
+            transform: Transform::from_xyz(0.0, -350.0, 0.0),
             ..default()
         },
         RigidBody::Static,
-        Collider::rectangle(1100.0, 50.0),
+        Collider::rectangle(length_wall, width_wall),
+        Name::new("Floor")
     ));
+    commands.spawn((
+        SpriteBundle {
+            sprite: Sprite {
+                color: Color::rgb(0.7, 0.7, 0.8),
+                custom_size: Some(Vec2::new(length_wall, width_wall)),
+                ..default()
+            },
+            transform: Transform::from_xyz(0.0, 350.0, 0.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::rectangle(length_wall, width_wall),
+        Name::new("Ceiling")
+    ));
+    commands.spawn((
+        SpriteBundle {
+            sprite: Sprite {
+                color: Color::rgb(0.7, 0.7, 0.8),
+                custom_size: Some(Vec2::new(width_wall,length_wall)),
+                ..default()
+            },
+            transform: Transform::from_xyz(-580.0, 0.0, 0.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::rectangle(width_wall, length_wall),
+        Name::new("Left wall")
+    ));
+    commands.spawn((
+        SpriteBundle {
+            sprite: Sprite {
+                color: Color::rgb(0.7, 0.7, 0.8),
+                custom_size: Some(Vec2::new(width_wall,length_wall)),
+                ..default()
+            },
+            transform: Transform::from_xyz(580.0, 0.0, 0.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::rectangle(width_wall, length_wall),
+        Name::new("Left wall")
+    ));
+
+    // Buckets
+
+    // Platforms
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
