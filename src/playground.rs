@@ -58,6 +58,16 @@ fn setup(
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
+    // background
+    commands.spawn((
+        SpriteBundle {
+            texture: asset_server.load("playground_background.png"),
+            ..default()
+        },
+        Pickable::IGNORE,
+        Name::new("background")
+    ));
+
     // Player
     let player_size = 40.0;
     commands.spawn((
@@ -82,7 +92,7 @@ fn setup(
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
-            material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
+            material: materials.add(Color::ORANGE),
             transform: Transform::from_xyz(80.0, 80.0, 0.0),
             ..default()
         },
@@ -104,7 +114,7 @@ fn setup(
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
-            material: materials.add(Color::rgb(0.2, 0.7, 0.9)),
+            material: materials.add(Color::ORANGE),
             transform: Transform::from_xyz(-50.0, 100.0, 0.0),
             ..default()
         },
@@ -125,11 +135,11 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::BLACK,
                 custom_size: Some(Vec2::new(length_wall, width_wall)),
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, -350.0, 0.0),
+            transform: Transform::from_xyz(0.0, -365.0, 0.0),
             ..default()
         },
         RigidBody::Static,
@@ -139,11 +149,11 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::BLACK,
                 custom_size: Some(Vec2::new(length_wall, width_wall)),
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, 350.0, 0.0),
+            transform: Transform::from_xyz(0.0, 365.0, 0.0),
             ..default()
         },
         RigidBody::Static,
@@ -153,11 +163,11 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::BLACK,
                 custom_size: Some(Vec2::new(width_wall, length_wall)),
                 ..default()
             },
-            transform: Transform::from_xyz(-580.0, 0.0, 0.0),
+            transform: Transform::from_xyz(-595.0, 0.0, 0.0),
             ..default()
         },
         RigidBody::Static,
@@ -167,11 +177,11 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::BLACK,
                 custom_size: Some(Vec2::new(width_wall, length_wall)),
                 ..default()
             },
-            transform: Transform::from_xyz(580.0, 0.0, 0.0),
+            transform: Transform::from_xyz(595.0, 0.0, 0.0),
             ..default()
         },
         RigidBody::Static,
