@@ -27,3 +27,7 @@ path = "src/basic_selection_and_dropping.rs"
 name = "basic_character"
 path = "src/basic_character.rs"
 
+[[example]]
+name = "playground"
+path = "src/playground.rs"
+
