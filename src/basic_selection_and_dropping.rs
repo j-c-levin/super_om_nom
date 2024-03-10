@@ -19,11 +19,6 @@ use bevy_mod_picking::prelude::*;
 #[derive(Component)]
 pub struct Attached;
 
-#[derive(Resource)]
-pub struct PreviouslyAttached {
-    entity: Entity,
-}
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {

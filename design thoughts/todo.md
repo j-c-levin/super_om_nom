@@ -9,3 +9,8 @@ so the next example should be about refining player controls and setting up a ne
 1. create a new playground with monkey bars, platforms, and objects of different sizes - s, m, l, xl, static (try and define these as constants)
 2. players don't whip off the screen and continue accelerating if they're holding something
 3. you should be able to have fun bouncing yourself around and putting the 'mess' into buckets.
+
+--
+
+* work out the locations for the walls and get them spawning
+* add in monkey bars and baskets
