@@ -3,6 +3,7 @@ This example is about setting up a physics playground where you can throw
 objects or yourself around for fun.
  */
 
+use std::ops::Add;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
@@ -46,7 +47,7 @@ fn main() {
             .disable::<DefaultHighlightingPlugin>())
 
         // debug systems
-        .add_plugins(WorldInspectorPlugin::new())
+        // .add_plugins(WorldInspectorPlugin::new())
         // .add_plugins(PhysicsDebugPlugin::default())
         // .insert_resource(DebugPickingMode::Normal)
         .run();
@@ -61,6 +62,7 @@ fn setup(
     // background
     commands.spawn((
         SpriteBundle {
+            transform: Transform::from_xyz(0.0, 0.0, -1.0),
             texture: asset_server.load("playground_background.png"),
             ..default()
         },
@@ -135,11 +137,11 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::BLACK,
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(length_wall, width_wall)),
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, -365.0, 0.0),
+            transform: Transform::from_xyz(0.0, -350.0, 0.0),
             ..default()
         },
         RigidBody::Static,
@@ -149,7 +151,7 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::BLACK,
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(length_wall, width_wall)),
                 ..default()
             },
@@ -163,7 +165,7 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::BLACK,
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(width_wall, length_wall)),
                 ..default()
             },
@@ -177,7 +179,7 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::BLACK,
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(width_wall, length_wall)),
                 ..default()
             },
@@ -193,7 +195,7 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(25.0, 160.0)),
                 ..default()
             },
@@ -207,7 +209,7 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(25.0, 160.0)),
                 ..default()
             },
@@ -220,14 +222,15 @@ fn setup(
     ));
 
     // Platforms
+    let position_x = 500.0;
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(150.0, 25.0)),
                 ..default()
             },
-            transform: Transform::from_xyz(480.0, 80.0, 0.0),
+            transform: Transform::from_xyz(position_x, 80.0, 0.0),
             ..default()
         },
         RigidBody::Static,
@@ -237,11 +240,11 @@ fn setup(
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
-                color: Color::rgb(0.7, 0.7, 0.8),
+                color: Color::SILVER,
                 custom_size: Some(Vec2::new(150.0, 25.0)),
                 ..default()
             },
-            transform: Transform::from_xyz(-480.0, 80.0, 0.0),
+            transform: Transform::from_xyz(-position_x, 80.0, 0.0),
             ..default()
         },
         RigidBody::Static,
@@ -249,6 +252,28 @@ fn setup(
         Name::new("platform left")
     ));
 
+    // monkey bars
+    let handle_size = 40.0;
+    let start_x = -220.0;
+    let increment_x = 150.0;
+    for i in 0..4 {
+        let x = start_x + (increment_x * i as f32);
+        commands.spawn((
+            SpriteBundle {
+                sprite: Sprite {
+                    color: Color::TOMATO,
+                    custom_size: Some(Vec2::splat(handle_size)),
+                    ..default()
+                },
+                transform: Transform::from_xyz(x, 215.0, 0.0),
+                ..default()
+            },
+            RigidBody::Static,
+            Collider::rectangle(handle_size, handle_size),
+            Name::new(format!("monkey bar {}", i)),
+            PickableBundle::default()
+        ));
+    }
 
     // Camera
     commands.spawn(Camera2dBundle::default());
@@ -309,9 +334,20 @@ fn apply_force_to_attached(
 
     // apply a fraction of the force back to om nom
     let force_const = 0.1;
+    let force_max = 10.0;
 
-    lv_om_nom.x += -force_const * force_x;
-    lv_om_nom.y += -force_const * force_y;
+    let mut omnom_force_x = -force_const * force_x * collider_density.0;
+    if omnom_force_x.abs() > force_max {
+        omnom_force_x = force_max * omnom_force_x.signum()
+    }
+
+    lv_om_nom.x += omnom_force_x;
+
+    let mut omnom_force_y = -force_const * force_y * collider_density.0;
+    if omnom_force_y.abs() > force_max {
+        omnom_force_y = force_max * omnom_force_y.signum()
+    }
+    lv_om_nom.y += omnom_force_y;
 }
 
 fn change_detection(

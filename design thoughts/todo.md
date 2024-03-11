@@ -14,3 +14,10 @@ so the next example should be about refining player controls and setting up a ne
 
 * work out the locations for the walls and get them spawning
 * add in monkey bars and baskets
+
+--
+
+* playground controls work with click and drag/touch and drag
+* wasm build
+* cap forces on om nom ✅
+* forces on om nom should be multiplied by the object's density (see ideas)
