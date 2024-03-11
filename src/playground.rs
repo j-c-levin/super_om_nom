@@ -3,6 +3,7 @@ This example is about setting up a physics playground where you can throw
 objects or yourself around for fun.
  */
 
+use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
@@ -19,10 +20,10 @@ struct OmNom;
 
 pub fn main() {
     App::new()
+        .insert_resource(AssetMetaCheck::Never)
         .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
             primary_window: Some(Window {
                 title: "Super om nom".into(),
-                // resolution: (500., 600.).into(),
                 enabled_buttons: bevy::window::EnabledButtons {
                     maximize: false,
                     ..Default::default()
@@ -276,6 +277,7 @@ fn setup(
                 ..default()
             },
             RigidBody::Static,
+            ColliderDensity(10.0),
             Collider::rectangle(handle_size, handle_size),
             Name::new(format!("monkey bar {}", i)),
             PickableBundle::default(),
