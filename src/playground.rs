@@ -78,7 +78,7 @@ fn setup(
                 ..default()
             },
             texture: asset_server.load("om_nom.png"),
-            transform: Transform::from_xyz(0.0, -50.0, 0.0),
+            transform: Transform::from_xyz(500.0, 120.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
@@ -89,46 +89,48 @@ fn setup(
         OmNom
     ));
 
-    // heavy capsule
-    commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
-            material: materials.add(Color::ORANGE),
-            transform: Transform::from_xyz(80.0, 80.0, 0.0),
-            ..default()
-        },
-        Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
-        Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
-        ColliderDensity(10.0),
-        GravityScale(1.5),
-        Collider::capsule(40.0, 25.0),
-        RigidBody::Dynamic,
-        LockedAxes::ROTATION_LOCKED,
-        PickableBundle::default(),
-        On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
-            target_commands.insert(Attached);
-        }),
-        Name::new("heavy capsule")
-    ));
+    for _ in 1..20 {
+        // heavy capsule
+        commands.spawn((
+            MaterialMesh2dBundle {
+                mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
+                material: materials.add(Color::ORANGE),
+                transform: Transform::from_xyz(80.0, 80.0, 0.0),
+                ..default()
+            },
+            Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
+            Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
+            ColliderDensity(10.0),
+            GravityScale(1.5),
+            Collider::capsule(40.0, 25.0),
+            RigidBody::Dynamic,
+            LockedAxes::ROTATION_LOCKED,
+            PickableBundle::default(),
+            On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
+                target_commands.insert(Attached);
+            }),
+            Name::new("heavy capsule")
+        ));
 
-    // light cube
-    commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
-            material: materials.add(Color::ORANGE),
-            transform: Transform::from_xyz(-50.0, 100.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
-        Collider::rectangle(30.0, 30.0),
-        PickableBundle::default(),
-        On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
-            target_commands.insert(Attached);
-        }),
-        Name::new("light square"),
-        LockedAxes::ROTATION_LOCKED,
-    ));
+        // light cube
+        commands.spawn((
+            MaterialMesh2dBundle {
+                mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
+                material: materials.add(Color::MIDNIGHT_BLUE),
+                transform: Transform::from_xyz(-50.0, 100.0, 0.0),
+                ..default()
+            },
+            RigidBody::Dynamic,
+            Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
+            Collider::rectangle(30.0, 30.0),
+            PickableBundle::default(),
+            On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
+                target_commands.insert(Attached);
+            }),
+            Name::new("light square"),
+            LockedAxes::ROTATION_LOCKED,
+        ));
+    }
 
     // Walls
     let length_wall = 1400.0;
