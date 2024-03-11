@@ -3,10 +3,6 @@ name = "super_om_nom"
 version = "0.0.1"
 edition = "2021"
 
-[[bin]]
-name = "playground"
-main = "src/playground.rs"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 bevy = "0.13.0"
@@ -24,15 +20,15 @@ opt-level = 3
 
 [[example]]
 name = "basic_selection"
-path = "src/bin/basic_selection_and_dropping.rs"
+path = "src/basic_selection_and_dropping.rs"
 
 [[example]]
 name = "basic_character"
-path = "src/bin/basic_character.rs"
+path = "src/basic_character.rs"
 
 [[example]]
 name = "playground"
-path = "src/bin/playground.rs"
+path = "src/playground.rs"
 
 # This is used by trunk as it doesn't support custom profiles: https://github.com/trunk-rs/trunk/issues/605
 # xbuild also uses this profile for building android AABs because I couldn't find a configuration for it

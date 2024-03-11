@@ -17,7 +17,7 @@ pub struct Attached;
 #[derive(Component)]
 struct OmNom;
 
-fn main() {
+pub fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
             primary_window: Some(Window {
