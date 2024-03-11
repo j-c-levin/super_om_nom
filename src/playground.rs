@@ -38,7 +38,6 @@ fn main() {
         .add_systems(Update, (
             bevy::window::close_on_esc,
             apply_force_to_attached,
-            change_detection,
             draw_line_to_attached
         ))
         .add_plugins(DefaultPickingPlugins
@@ -94,7 +93,7 @@ fn setup(
         commands.spawn((
             MaterialMesh2dBundle {
                 mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
-                material: materials.add(Color::ORANGE),
+                material: materials.add(Color::rgb(0.31,0.54,0.98)),
                 transform: Transform::from_xyz(80.0, 80.0, 0.0),
                 ..default()
             },
@@ -106,8 +105,11 @@ fn setup(
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
             PickableBundle::default(),
-            On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
+            On::<Pointer<DragStart>>::target_commands_mut(|_click, target_commands| {
                 target_commands.insert(Attached);
+            }),
+            On::<Pointer<DragEnd>>::target_commands_mut(|_click, target_commands| {
+                target_commands.remove::<Attached>();
             }),
             Name::new("heavy capsule")
         ));
@@ -116,7 +118,7 @@ fn setup(
         commands.spawn((
             MaterialMesh2dBundle {
                 mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
-                material: materials.add(Color::MIDNIGHT_BLUE),
+                material: materials.add(Color::rgb(0.35,0.69,0.99)),
                 transform: Transform::from_xyz(-50.0, 100.0, 0.0),
                 ..default()
             },
@@ -124,14 +126,18 @@ fn setup(
             Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
             Collider::rectangle(30.0, 30.0),
             PickableBundle::default(),
-            On::<Pointer<Click>>::target_commands_mut(|_click, target_commands| {
+            On::<Pointer<DragStart>>::target_commands_mut(|_click, target_commands| {
                 target_commands.insert(Attached);
+            }),
+            On::<Pointer<DragEnd>>::target_commands_mut(|_click, target_commands| {
+                target_commands.remove::<Attached>();
             }),
             Name::new("light square"),
             LockedAxes::ROTATION_LOCKED,
         ));
     }
 
+    //region static
     // Walls
     let length_wall = 1400.0;
     let width_wall = 50.0;
@@ -272,9 +278,16 @@ fn setup(
             RigidBody::Static,
             Collider::rectangle(handle_size, handle_size),
             Name::new(format!("monkey bar {}", i)),
-            PickableBundle::default()
+            PickableBundle::default(),
+            On::<Pointer<DragStart>>::target_commands_mut(|_click, target_commands| {
+                target_commands.insert(Attached);
+            }),
+            On::<Pointer<DragEnd>>::target_commands_mut(|_click, target_commands| {
+                target_commands.remove::<Attached>();
+            }),
         ));
     }
+    //endregion
 
     // Camera
     commands.spawn(Camera2dBundle::default());
@@ -349,20 +362,6 @@ fn apply_force_to_attached(
         omnom_force_y = force_max * omnom_force_y.signum()
     }
     lv_om_nom.y += omnom_force_y;
-}
-
-fn change_detection(
-    mut commands: Commands,
-    query: Query<(Entity, &PickSelection), Changed<PickSelection>>,
-) {
-    for (entity, component) in &query {
-        if component.is_selected == false {
-            commands.entity(entity).remove::<Attached>();
-            commands.entity(entity).remove::<Pickable>();
-        } else {
-            commands.entity(entity).insert((Attached, Pickable::IGNORE));
-        }
-    }
 }
 
 fn draw_line_to_attached(
