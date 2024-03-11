@@ -3,7 +3,6 @@ This example is about setting up a physics playground where you can throw
 objects or yourself around for fun.
  */
 
-use std::ops::Add;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
@@ -100,7 +99,7 @@ fn setup(
         },
         Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
         Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
-        ColliderDensity(300.0),
+        ColliderDensity(10.0),
         GravityScale(1.5),
         Collider::capsule(40.0, 25.0),
         RigidBody::Dynamic,
