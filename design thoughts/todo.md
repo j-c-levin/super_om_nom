@@ -18,6 +18,6 @@ so the next example should be about refining player controls and setting up a ne
 --
 
 * playground controls work with click and drag/touch and drag ✅
-* wasm build
+* wasm build ✅
 * cap forces on om nom ✅
 * forces on om nom should be multiplied by the object's density (see ideas) ✅
