@@ -21,13 +21,9 @@ struct OmNom;
 pub fn main() {
     App::new()
         .insert_resource(AssetMetaCheck::Never)
-        .add_plugins(DefaultPlugins.set(bevy::prelude::WindowPlugin {
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Super om nom".into(),
-                enabled_buttons: bevy::window::EnabledButtons {
-                    maximize: false,
-                    ..Default::default()
-                },
                 ..default()
             }),
             ..default()
