@@ -123,6 +123,7 @@ fn setup(
             Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
             Collider::rectangle(30.0, 30.0),
             PickableBundle::default(),
+            ColliderDensity(0.5),
             On::<Pointer<DragStart>>::target_commands_mut(|_click, target_commands| {
                 target_commands.insert(Attached);
             }),
