@@ -53,7 +53,11 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
+    mut windows: Query<&mut Window>
 ) {
+    let mut window = windows.single_mut();
+    window.resolution.set_scale_factor_override(Some(1.0));
+
     // background
     commands.spawn((
         SpriteBundle {
