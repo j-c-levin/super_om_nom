@@ -391,7 +391,7 @@ fn store_pointer_location(
 
     for event in touch_events.read() {
         if event.phase == TouchPhase::Moved {
-            let Ok(pos) = camera.viewport_to_world_2d(camera_transform, event.position) else {
+            let Some(pos) = camera.viewport_to_world_2d(camera_transform, event.position) else {
                 return
             };
             pointer_location.0 = pos;
