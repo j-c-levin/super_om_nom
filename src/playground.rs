@@ -4,6 +4,7 @@ objects or yourself around for fun.
  */
 
 use bevy::asset::AssetMetaCheck;
+use bevy::input::touch::TouchPhase;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
@@ -18,6 +19,9 @@ pub struct Attached;
 #[derive(Component)]
 struct OmNom;
 
+#[derive(Resource)]
+struct PointerLocation(Vec2);
+
 pub fn main() {
     App::new()
         .insert_resource(AssetMetaCheck::Never)
@@ -31,10 +35,12 @@ pub fn main() {
         .add_plugins(PhysicsPlugins::default())
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
         .insert_resource(Gravity(Vector::NEG_Y * 1000.0))
+        .insert_resource(PointerLocation(Vec2::ZERO))
         .add_systems(Startup, setup)
         .add_systems(Update, (
             bevy::window::close_on_esc,
-            apply_force_to_attached,
+            (store_pointer_location,
+             apply_force_to_attached).chain(),
             draw_line_to_attached
         ))
         .add_plugins(DefaultPickingPlugins
@@ -53,7 +59,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
-    mut windows: Query<&mut Window>
+    mut windows: Query<&mut Window>,
 ) {
     let mut window = windows.single_mut();
     window.resolution.set_scale_factor_override(Some(1.0));
@@ -94,7 +100,7 @@ fn setup(
         commands.spawn((
             MaterialMesh2dBundle {
                 mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
-                material: materials.add(Color::rgb(0.31,0.54,0.98)),
+                material: materials.add(Color::rgb(0.31, 0.54, 0.98)),
                 transform: Transform::from_xyz(80.0, 80.0, 0.0),
                 ..default()
             },
@@ -119,7 +125,7 @@ fn setup(
         commands.spawn((
             MaterialMesh2dBundle {
                 mesh: meshes.add(Rectangle::new(30.0, 30.0)).into(),
-                material: materials.add(Color::rgb(0.35,0.69,0.99)),
+                material: materials.add(Color::rgb(0.35, 0.69, 0.99)),
                 transform: Transform::from_xyz(-50.0, 100.0, 0.0),
                 ..default()
             },
@@ -299,9 +305,8 @@ fn setup(
 fn apply_force_to_attached(
     time: Res<Time>,
     mut attached: Query<(&mut LinearVelocity, &Transform, &ColliderDensity), With<Attached>>,
-    windows: Query<&Window, With<PrimaryWindow>>,
-    camera: Query<(&Camera, &GlobalTransform)>,
     mut om_nom: Query<&mut LinearVelocity, (With<OmNom>, Without<Attached>)>,
+    pointer_location: Res<PointerLocation>
 ) {
     let Ok((mut linear_velocity, transform, collider_density)) = attached.get_single_mut() else {
         return;
@@ -310,24 +315,14 @@ fn apply_force_to_attached(
     let Ok(mut lv_om_nom) = om_nom.get_single_mut() else {
         panic!("no om nom")
     };
-
-    // mouse position
-    let window = windows.single();
-    let (camera, camera_transform) = camera.single();
-    let Some(cursor_world_pos) = window
-        .cursor_position()
-        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor)) else {
-        return;
-    };
-
     // F=-kx-cv
     // k is spring constantly ('stiffness')
     let kx = 20.0;
     let ky = 100.0;
 
     // x is distance from spring resting point
-    let dist_x = cursor_world_pos.x - transform.translation.x;
-    let dist_y = cursor_world_pos.y - transform.translation.y;
+    let dist_x = pointer_location.0.x - transform.translation.x;
+    let dist_y = pointer_location.0.y - transform.translation.y;
 
     let delta_time = time.delta_seconds();
 
@@ -351,18 +346,19 @@ fn apply_force_to_attached(
 
     // apply a fraction of the force back to om nom
     let force_const = 0.1;
-    let force_max = 10.0;
+    let force_max_x = 15.0;
+    let force_max_y = 20.0;
 
     let mut omnom_force_x = -force_const * force_x * collider_density.0;
-    if omnom_force_x.abs() > force_max {
-        omnom_force_x = force_max * omnom_force_x.signum()
+    if omnom_force_x.abs() > force_max_x {
+        omnom_force_x = force_max_x * omnom_force_x.signum()
     }
 
     lv_om_nom.x += omnom_force_x;
 
     let mut omnom_force_y = -force_const * force_y * collider_density.0;
-    if omnom_force_y.abs() > force_max {
-        omnom_force_y = force_max * omnom_force_y.signum()
+    if omnom_force_y.abs() > force_max_y {
+        omnom_force_y = force_max_y * omnom_force_y.signum()
     }
     lv_om_nom.y += omnom_force_y;
 }
@@ -383,4 +379,28 @@ fn draw_line_to_attached(
     let pos_om_nom = Vec2::new(om_nom.translation.x, om_nom.translation.y);
     let pos_attached = Vec2::new(attached.translation.x, attached.translation.y);
     gizmos.line_2d(pos_om_nom, pos_attached, Color::RED);
+}
+
+fn store_pointer_location(
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut touch_events: EventReader<TouchInput>,
+    mut pointer_location: ResMut<PointerLocation>,
+    camera: Query<(&Camera, &GlobalTransform)>,
+) {
+    for event in touch_events.read() {
+        if event.phase == TouchPhase::Moved {
+            pointer_location.0 = event.position;
+            return
+        }
+    }
+
+    // we'll only get to here if there's no touch events
+    let window = windows.single();
+    let (camera, camera_transform) = camera.single();
+    let Some(cursor_world_pos) = window
+        .cursor_position()
+        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor)) else {
+        return
+    };
+    pointer_location.0 = cursor_world_pos;
 }
