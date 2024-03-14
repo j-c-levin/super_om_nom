@@ -387,16 +387,20 @@ fn store_pointer_location(
     mut pointer_location: ResMut<PointerLocation>,
     camera: Query<(&Camera, &GlobalTransform)>,
 ) {
+    let (camera, camera_transform) = camera.single();
+
     for event in touch_events.read() {
         if event.phase == TouchPhase::Moved {
-            pointer_location.0 = event.position;
+            let Ok(pos) = camera.viewport_to_world_2d(camera_transform, event.position) else {
+                return
+            };
+            pointer_location.0 = pos;
             return
         }
     }
 
     // we'll only get to here if there's no touch events
     let window = windows.single();
-    let (camera, camera_transform) = camera.single();
     let Some(cursor_world_pos) = window
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor)) else {
