@@ -52,7 +52,7 @@ pub fn main() {
             .disable::<DefaultHighlightingPlugin>())
 
         // debug systems
-        .add_plugins(WorldInspectorPlugin::new())
+        // .add_plugins(WorldInspectorPlugin::new())
         // .add_plugins(PhysicsDebugPlugin::default())
         // .insert_resource(DebugPickingMode::Normal)
         .run();
