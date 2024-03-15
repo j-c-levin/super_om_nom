@@ -7,7 +7,7 @@ use bevy::asset::AssetMetaCheck;
 use bevy::input::touch::TouchPhase;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
-use bevy::window::PrimaryWindow;
+use bevy::window::{PrimaryWindow, WindowResolution};
 #[allow(unused_imports)]
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::{math::*, prelude::*};
@@ -28,6 +28,9 @@ pub fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Super om nom".into(),
+                resolution: WindowResolution::new(1280.0, 720.0),
+                canvas: Some("#bevy".to_string()),
+                present_mode: bevy::window::PresentMode::AutoNoVsync,
                 ..default()
             }),
             ..default()
@@ -62,7 +65,7 @@ fn setup(
     mut windows: Query<&mut Window>,
 ) {
     let mut window = windows.single_mut();
-    window.resolution.set_scale_factor_override(Some(1.0));
+    // window.resolution.set_scale_factor_override(Some(1.0));
 
     // background
     commands.spawn((

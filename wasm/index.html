@@ -1,17 +1,92 @@
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <style>-->
+<!--        body, html {-->
+<!--            background-color: #eee;-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        #game {-->
+<!--            image-rendering: optimizeSpeed;             /* Older versions of FF */-->
+<!--            image-rendering: -moz-crisp-edges;          /* FF 6.0+ */-->
+<!--            image-rendering: -webkit-optimize-contrast; /* Safari */-->
+<!--            image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */-->
+<!--            image-rendering: optimize-contrast;         /* Possible future browsers. */-->
+<!--            -ms-interpolation-mode: nearest-neighbor;   /* IE */-->
+<!--            width: auto;-->
+<!--            height: auto;-->
+<!--            max-width: 100%;-->
+<!--            max-height: 100%;-->
+<!--        }-->
+
+<!--        #game_container {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--        }-->
+<!--    </style>-->
+<!--    <title>Super Om Nom</title>-->
+<!--</head>-->
+<!--<body scroll="no" style="overflow: hidden">-->
+<!--<div id="game_container" class="game-container">-->
+<!--    <script type="module">-->
+<!--        import init from './super_om_nom.js'-->
+
+<!--        init()-->
+<!--    </script>-->
+<!--    <canvas id="bevy">-->
+<!--        Javascript and support for canvas is required-->
+<!--    </canvas>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>Bevy game</title>
-    <link data-trunk rel="inline" href="styles.css"/>
+    <meta charset="utf-8" />
+    <title>Super Om Nom</title>
 </head>
-<body>
-<div class="game-container">
-    <div class="lds-dual-ring"></div>
-    <canvas id="bevy">
-        Javascript and support for canvas is required
-    </canvas>
+<style>
+    body, html {
+        background-color: #eee;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    #bevy {
+        image-rendering: optimizeSpeed;             /* Older versions of FF */
+        image-rendering: -moz-crisp-edges;          /* FF 6.0+ */
+        image-rendering: -webkit-optimize-contrast; /* Safari */
+        image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+        image-rendering: optimize-contrast;         /* Possible future browsers. */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE */
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+    }
+
+    #game_container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+<body scroll="no" style="overflow: hidden">
+<div id="game_container">
+    <canvas id="bevy"></canvas>
     <script type="module">
         import './restart-audio-context.js'
         import init from './super_om_nom.js'
@@ -24,5 +99,4 @@
     </script>
 </div>
 </body>
-
 </html>
