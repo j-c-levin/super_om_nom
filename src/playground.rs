@@ -6,6 +6,7 @@ objects or yourself around for fun.
 use bevy::asset::AssetMetaCheck;
 use bevy::input::touch::TouchPhase;
 use bevy::prelude::*;
+use bevy::render::camera::ScalingMode;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::{PrimaryWindow, WindowResolution};
 #[allow(unused_imports)]
@@ -64,10 +65,10 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window>,
 ) {
-    let mut window = windows.single_mut();
+    // let mut window = windows.single_mut();
     // window.resolution.set_scale_factor_override(Some(1.0));
 
-    // background
+    // region background
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_xyz(0.0, 0.0, -1.0),
@@ -77,8 +78,9 @@ fn setup(
         Pickable::IGNORE,
         Name::new("background")
     ));
+    //endregion
 
-    // Player
+    // region Player
     let player_size = 40.0;
     commands.spawn((
         SpriteBundle {
@@ -97,7 +99,9 @@ fn setup(
         Name::new("player"),
         OmNom
     ));
+    //endregion
 
+    //region objects
     for _ in 1..20 {
         // heavy capsule
         commands.spawn((
@@ -147,6 +151,7 @@ fn setup(
             LockedAxes::ROTATION_LOCKED,
         ));
     }
+    //endregion
 
     //region static
     // Walls
@@ -302,7 +307,13 @@ fn setup(
     //endregion
 
     // Camera
-    commands.spawn(Camera2dBundle::default());
+    let mut camera_bundle = Camera2dBundle::default();
+    const GAME_SHAPE: Vec2 = Vec2 { x: 1280.0, y: 720.0 };
+    camera_bundle.projection.scaling_mode = ScalingMode::AutoMin {
+        min_width: GAME_SHAPE.x,
+        min_height: GAME_SHAPE.y,
+    };
+    commands.spawn(camera_bundle);
 }
 
 fn apply_force_to_attached(
