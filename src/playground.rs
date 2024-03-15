@@ -309,10 +309,11 @@ fn setup(
     // Camera
     let mut camera_bundle = Camera2dBundle::default();
     const GAME_SHAPE: Vec2 = Vec2 { x: 1280.0, y: 720.0 };
-    camera_bundle.projection.scaling_mode = ScalingMode::AutoMin {
-        min_width: GAME_SHAPE.x,
-        min_height: GAME_SHAPE.y,
-    };
+    // camera_bundle.projection.scaling_mode = ScalingMode::AutoMin {
+    //     min_width: GAME_SHAPE.x,
+    //     min_height: GAME_SHAPE.y,
+    // };
+    camera_bundle.projection.scaling_mode = ScalingMode::FixedHorizontal(1280.0);
     commands.spawn(camera_bundle);
 }
 
