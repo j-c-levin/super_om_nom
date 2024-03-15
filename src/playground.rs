@@ -52,7 +52,7 @@ pub fn main() {
             .disable::<DefaultHighlightingPlugin>())
 
         // debug systems
-        // .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins(WorldInspectorPlugin::new())
         // .add_plugins(PhysicsDebugPlugin::default())
         // .insert_resource(DebugPickingMode::Normal)
         .run();
@@ -63,11 +63,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
-    mut windows: Query<&mut Window>,
 ) {
-    // let mut window = windows.single_mut();
-    // window.resolution.set_scale_factor_override(Some(1.0));
-
     // region background
     commands.spawn((
         SpriteBundle {
@@ -102,13 +98,13 @@ fn setup(
     //endregion
 
     //region objects
-    for _ in 1..20 {
+    for i in 1..10 {
         // heavy capsule
         commands.spawn((
             MaterialMesh2dBundle {
                 mesh: meshes.add(Capsule2d::new(25.0, 40.0)).into(),
                 material: materials.add(Color::rgb(0.31, 0.54, 0.98)),
-                transform: Transform::from_xyz(80.0, 80.0, 0.0),
+                transform: Transform::from_xyz(80.0 + (i as f32), 0.0, 0.0),
                 ..default()
             },
             Friction::new(0.05).with_combine_rule(CoefficientCombine::Min),
@@ -155,62 +151,61 @@ fn setup(
 
     //region static
     // Walls
-    let length_wall = 1400.0;
     let width_wall = 50.0;
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::SILVER,
-                custom_size: Some(Vec2::new(length_wall, width_wall)),
+                custom_size: Some(Vec2::new(1145.0, width_wall)),
                 ..default()
             },
             transform: Transform::from_xyz(0.0, -350.0, 0.0),
             ..default()
         },
         RigidBody::Static,
-        Collider::rectangle(length_wall, width_wall),
+        Collider::rectangle(1145.0, width_wall),
         Name::new("Floor")
     ));
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::SILVER,
-                custom_size: Some(Vec2::new(length_wall, width_wall)),
+                custom_size: Some(Vec2::new(1145.0, width_wall)),
                 ..default()
             },
             transform: Transform::from_xyz(0.0, 365.0, 0.0),
             ..default()
         },
         RigidBody::Static,
-        Collider::rectangle(length_wall, width_wall),
+        Collider::rectangle(1145.0, width_wall),
         Name::new("Ceiling")
     ));
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::SILVER,
-                custom_size: Some(Vec2::new(width_wall, length_wall)),
+                custom_size: Some(Vec2::new(width_wall,  741.0)),
                 ..default()
             },
             transform: Transform::from_xyz(-595.0, 0.0, 0.0),
             ..default()
         },
         RigidBody::Static,
-        Collider::rectangle(width_wall, length_wall),
+        Collider::rectangle(width_wall, 741.0),
         Name::new("Left wall")
     ));
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::SILVER,
-                custom_size: Some(Vec2::new(width_wall, length_wall)),
+                custom_size: Some(Vec2::new(width_wall,  741.0)),
                 ..default()
             },
             transform: Transform::from_xyz(595.0, 0.0, 0.0),
             ..default()
         },
         RigidBody::Static,
-        Collider::rectangle(width_wall, length_wall),
+        Collider::rectangle(width_wall, 741.0),
         Name::new("Left wall")
     ));
 
@@ -308,11 +303,6 @@ fn setup(
 
     // Camera
     let mut camera_bundle = Camera2dBundle::default();
-    const GAME_SHAPE: Vec2 = Vec2 { x: 1280.0, y: 720.0 };
-    // camera_bundle.projection.scaling_mode = ScalingMode::AutoMin {
-    //     min_width: GAME_SHAPE.x,
-    //     min_height: GAME_SHAPE.y,
-    // };
     camera_bundle.projection.scaling_mode = ScalingMode::FixedHorizontal(1280.0);
     commands.spawn(camera_bundle);
 }

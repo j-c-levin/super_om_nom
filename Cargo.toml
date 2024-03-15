@@ -30,10 +30,9 @@ path = "src/basic_character.rs"
 name = "playground"
 path = "src/playground.rs"
 
-# This is used by trunk as it doesn't support custom profiles: https://github.com/trunk-rs/trunk/issues/605
-# xbuild also uses this profile for building android AABs because I couldn't find a configuration for it
 [profile.release]
-opt-level = "s"
-lto = true
+lto = "thin"
+strip = true      # Automatically strip symbols from the binary.
+opt-level = "z"   # Optimize for size.
+panic = "abort"
 codegen-units = 1
-strip = true
