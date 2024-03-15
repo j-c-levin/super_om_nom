@@ -72,8 +72,8 @@
         -ms-interpolation-mode: nearest-neighbor;   /* IE */
         max-width: 100%;
         max-height: 100%;
-        width: auto;
-        height: auto;
+        width: 100%;
+        height: 100%;
     }
 
     #game_container {
@@ -86,7 +86,7 @@
 </style>
 <body scroll="no" style="overflow: hidden">
 <div id="game_container">
-    <canvas id="bevy"></canvas>
+    <canvas id="bevy" width="1000" height="1000"></canvas>
     <script type="module">
         import './restart-audio-context.js'
         import init from './super_om_nom.js'
